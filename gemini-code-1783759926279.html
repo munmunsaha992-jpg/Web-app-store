@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>App Gallery - Secure</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+            margin: 0;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .header-banner {
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            border-bottom: 2px solid #3b82f6;
+            padding: 20px;
+            text-align: center;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+        }
+        h1 {
+            margin: 0;
+            font-size: 24px;
+            color: #60a5fa;
+            letter-spacing: 0.5px;
+        }
+        .subtitle {
+            margin-top: 6px;
+            font-size: 13px;
+            color: #94a3b8;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-width: 600px;
+            margin: 0 auto;
+            width: 100%;
+            flex: 1;
+        }
+        .card {
+            background-color: #1e293b;
+            padding: 16px;
+            border-radius: 10px;
+            border-left: 5px solid #3b82f6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            transition: transform 0.2s ease;
+        }
+        .card:hover {
+            transform: translateY(-2px);
+        }
+        .card-info {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .app-name {
+            font-size: 16px;
+            font-weight: bold;
+            color: #f1f5f9;
+        }
+        .tag {
+            font-size: 11px;
+            background-color: #0f172a;
+            padding: 3px 8px;
+            border-radius: 4px;
+            width: fit-content;
+            color: #facc15;
+            border: 1px solid #334155;
+        }
+        .code-badge {
+            background-color: #0f172a;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 14px;
+            color: #38bdf8;
+            border: 1px solid #334155;
+        }
+        .loading {
+            text-align: center;
+            color: #94a3b8;
+            padding: 40px;
+            font-style: italic;
+        }
+        .footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 12px;
+            color: #64748b;
+            border-top: 1px solid #1e293b;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header-banner">
+        <h1>App Gallery</h1>
+        <div class="subtitle">Explore & Discover Apps</div>
+    </div>
+
+    <div class="container" id="app-container">
+        <div class="loading">Please enter password to load apps...</div>
+    </div>
+
+    <div class="footer">
+        Web made by Rohanx[cite: 1, 2]
+    </div>
+
+    <script>
+        // Yahan aap apna hard/strong password change kar sakte hain
+        const adminPassword = "Rohanx@987#Secure";
+        const userInput = prompt("Enter Admin Password to access App Gallery:");
+
+        if (userInput !== adminPassword) {
+            document.getElementById('app-container').innerHTML = '<div class="loading" style="color: #ef4444;">Access Denied! Incorrect Password.</div>';
+        } else {
+            const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQKHORmWOjZcEP7ig4wSP4PVv_JhjTfH-uOATgSjGwf96fAkLt7xXbK4gaNC-RsMLJ6mZpphd3Qc8yY/pub?gid=0&single=true&output=csv";
+
+            fetch(csvUrl)
+                .then(response => response.text())
+                .then(data => {
+                    const rows = data.split('\n').map(row => row.split(','));
+                    const container = document.getElementById('app-container');
+                    container.innerHTML = '';
+
+                    let hasContent = false;
+                    for (let i = 1; i < rows.length; i++) {
+                        const cols = rows[i];
+                        if (cols.length >= 2 && cols[0].trim() !== '') {
+                            hasContent = true;
+                            const appName = cols[0].replace(/"/g, '').trim();
+                            const colB = cols[1] ? cols[1].replace(/"/g, '').trim() : '';
+                            const colC = cols[2] ? cols[2].replace(/"/g, '').trim() : '';
+
+                            const card = document.createElement('div');
+                            card.className = 'card';
+                            card.innerHTML = `
+                                <div class="card-info">
+                                    <span class="app-name">${appName}</span>
+                                    <span class="tag">${colC || 'App'}</span>
+                                </div>
+                                <div class="code-badge">${colB}</div>
+                            `;
+                            container.appendChild(card);
+                        }
+                    }
+                    if (!hasContent) {
+                        container.innerHTML = '<div class="loading">No apps found.</div>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching data:', error);
+                    document.getElementById('app-container').innerHTML = '<div class="loading" style="color: #ef4444;">Failed to load data. Note: If opening locally, use a local server or host on Netlify/GitHub Pages to bypass CORS limits.</div>';
+                });
+        }
+    </script>
+</body>
+</html>
